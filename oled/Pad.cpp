@@ -18,6 +18,7 @@ void Pad::draw() {
   display->fillRect(x, y, width, height, SSD1306_WHITE);
 }
 
+// Updating physics
 void Pad::move() {
   if (y + vel <= 0 || y + height + vel >= display->height()) {
     y = constrain(y, 0, display->height() - height);
