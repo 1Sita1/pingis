@@ -42,15 +42,18 @@ int player2Score = 0;
 void setup() {
   Serial.begin(115200);
 
+  // AP init
   Serial.print("Setting AP (Access Point)…");
   WiFi.softAP(ssid, password);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
-
+  
+  // Websockets init
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 
+  // SPIFFS init
   if(!SPIFFS.begin(true)){
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
@@ -66,6 +69,7 @@ void setup() {
   delay(500);
   display.clearDisplay(); 
   
+  // Serve static files
   server.serveStatic("/static/", SPIFFS, "/static/");
   server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/index.html", "text/html");
@@ -77,6 +81,8 @@ void loop() {
   display.clearDisplay();
   
   ball.move();
+  
+  // Ball out of bounds
   if (ball.x < 0 || ball.x + ball.pxSize > display.width()) {
     if (ball.x < 0) {
       writeCenter("Player 2 won", display.width() / 2, display.height() / 2);
@@ -96,11 +102,13 @@ void loop() {
     restart();
   }
 
+  // Ball hit on horizontal walls
   if (ball.y < 0 || ball.y > display.height() - ball.pxSize) {
     ball.y = constrain(ball.y, 1, display.height() - 1 - ball.pxSize);
     ball.velY *= -1;
   }
 
+  // Pad hit detection
   if (ball.x <= pad1.x + pad1.width && ball.y + ball.pxSize >= pad1.y && ball.y <= pad1.y + pad1.height) {
     float intersectY = pad1.y + (pad1.height / 2) - ball.y;
     float padHalf = pad1.height / 2;
@@ -159,7 +167,7 @@ void writeCenter(char* text, int x, int y) {
   display.print(text);
 }
 
-
+// Processing events
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t mylength) {
     switch(type) {
         case WStype_DISCONNECTED:
