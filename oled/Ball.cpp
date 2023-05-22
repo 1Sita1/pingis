@@ -15,10 +15,12 @@ Ball::Ball(int ballX, int ballY, float ballVel, int ballSize, Adafruit_SSD1306 *
   display = userDisplay;
 }
 
+// Drawing the ball
 void Ball::draw() {
   display->fillRect(x, y, pxSize, pxSize, SSD1306_WHITE);
 }
 
+// Updating physics
 void Ball::move() {
   x += (int) velX;
   y += (int) velY;
